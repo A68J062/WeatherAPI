@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>07-氣象播報卡</title>
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+        body{
+            margin: 0;
+            padding: 20px;
+        }
+        .card{
+            width: 300px;
+            height: 450px;
+            background-color:darkgray;
+            border: 1px solid #000;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            font-size: 20px;
+            align-items: center;
+            margin: 10px;
+        }
+        .img{
+            width: 100%;
+            height: 60%;
+            background-color: aliceblue;
+            border-radius: 5px 5px 0 0;
+        }
+        .country-name{
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .temperature{
+            display: flex;
+        }
+        .container{
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            background-color:blueviolet;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="img"></div>
+            <div class="county-name">台北市</div>
+            <div class="wx">晴時多雲</div>
+            <div class="temperature">
+                <div class="max-t">36°C</div>～
+                <div class="min-t">2°C</div>
+            </div>
+            <div class="ci">寒冷至舒適</div>
+            <div class="pop">降雨機率：10%</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- method="post"較有隱私 -->
+        <form action="" method="post"></form>
+    </div>
+
+
+
+
+
+    <script>
+        const url = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-3FC7E099-011A-4756-97D0-3D87AB0D0693';
+        const counties =['臺北市', '新北市', '基隆市', '宜蘭縣', '桃園市', '新竹縣', '新竹市', '苗栗縣', '臺中市', '彰化縣', '南投縣', '雲林縣', '嘉義縣', '嘉義市', '臺南市', '高雄市', '屏東縣', '花蓮縣', '臺東縣', '連江縣', '金門縣', '澎湖縣'];
+
+        fetch(url)
+        .then(function(response){
+            return response.json();
+        })
+        .then(function(data){
+            let locations = data['records']['location'];
+
+            let weatherData = {}; 
+            
+            locations.forEach(function (location){
+                weatherData[location['locationName']] = {};
+                let weatherElements = location['weatherElement'];
+                weatherElements.forEach(function (weatherElement){
+                    weatherData[location['locationName']][weatherElement['elementName']] = weatherElement['time'][0]['parameter']['parameterName'];
+                })
+            
+            })
+            console.log(weatherData);
+
+            const containerEle = document.querySelector('.container');
+            let cards = '';
+            counties.forEach(function (county){
+                console.log(county);
+                cards += `<div class="card">
+                            <div class="img"></div>
+                            <div class="county-name">${county}</div>
+                            <div class="wx">${weatherData[county]['Wx']}</div>
+                            <div class="temperature">
+                                <div class="max-t">${weatherData[county]['MaxT']}</div>～
+                                <div class="min-t">${weatherData[county]['MinT']}</div>
+                            </div>
+                            <div class="ci">${weatherData[county]['CI']}</div>
+                            <div class="pop">降雨機率：${weatherData[county]['PoP']}</div>
+                        </div>`
+            })
+            containerEle.innerHTML = cards;  
+        })
+    </script>
+</body>
+</html>
